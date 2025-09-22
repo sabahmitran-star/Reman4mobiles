@@ -1,0 +1,270 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>متجري العصري</title>
+<link href="https://fonts.googleapis.com/css2?family=Cairo&display=swap" rel="stylesheet">
+<style>
+body {margin:0;font-family:'Cairo',sans-serif;background:linear-gradient(135deg,#1e1e1e,#2c3e50);color:white;}
+header {background:linear-gradient(90deg,#0984e3,#6c5ce7);display:flex;align-items:center;justify-content:space-between;padding:15px 20px;box-shadow:0 4px 6px rgba(0,0,0,0.3);}
+header h1 {margin:0;font-size:2rem;}
+#logo {height:80px;border-radius:12px;cursor:pointer;transition:0.3s;}
+#logo:hover{transform:scale(1.05);}
+#adminLoginBtn, #adminBtn {position:fixed;top:10px;left:10px;padding:5px 8px;font-size:12px;border:none;border-radius:5px;cursor:pointer;z-index:1000;background:#6c5ce7;color:white;}
+nav {display:flex;justify-content:flex-start;flex-wrap:wrap;padding:15px;margin-top:10px;gap:10px;overflow-x:auto;}
+nav button {flex:0 0 auto;margin:5px;padding:12px 18px;font-size:16px;border:none;border-radius:20px;background:linear-gradient(90deg,#ff7675,#fd79a8);color:white;cursor:pointer;transition:0.3s;}
+nav button.active {box-shadow:0 0 10px #fff;transform:scale(1.05);}
+nav button:hover {transform:scale(1.05);}
+#products {padding:10px;display:grid;grid-template-columns:repeat(auto-fill,minmax(180px,1fr));gap:15px;max-height:calc(100vh - 250px);overflow-y:auto;}
+.card {background:linear-gradient(145deg,#2d3436,#636e72);border-radius:15px;display:flex;flex-direction:column;align-items:center;padding:10px;transition:0.3s;cursor:pointer;}
+.card:hover {transform:scale(1.05);box-shadow:0 8px 20px rgba(0,0,0,0.5);}
+.card img {width:100%;border-radius:12px;object-fit:contain;margin-bottom:10px;transition:0.3s;}
+.card h3 {font-weight:bold;margin:5px 0;}
+.card p {color:#00E676;font-weight:bold;margin:5px 0;}
+.card button {padding:8px 12px;margin:5px;border:none;border-radius:12px;cursor:pointer;transition:0.3s;}
+.addBtn {background:linear-gradient(90deg,#00b894,#55efc4);color:black;}
+.editBtn {background:linear-gradient(90deg,#fdcb6e,#ffeaa7);color:black;}
+.delBtn {background:linear-gradient(90deg,#e17055,#d63031);color:white;}
+#cart {position:fixed;bottom:10px;left:50%;transform:translateX(-50%);width:90%;max-width:400px;background:linear-gradient(90deg,#2d3436,#636e72);padding:15px;box-shadow:0 4px 6px rgba(0,0,0,0.3);z-index:999;display:none;flex-direction:column;align-items:center;}
+#cart h3 {margin:5px 0;}
+#cartItems {max-height:150px;overflow-y:auto;width:100%;text-align:right;margin-bottom:5px;}
+#cart button {background:linear-gradient(90deg,#e17055,#d63031);border:none;padding:10px 15px;border-radius:12px;color:white;cursor:pointer;transition:0.3s;margin-top:10px;}
+#cart button:hover{transform:scale(1.05);}
+#cartTotal{margin-top:5px;color:#00E676;font-weight:bold;}
+#adminPanel {display:none;position:fixed;top:5%;left:50%;transform:translateX(-50%);background:#2d3436;color:white;padding:20px;border-radius:15px;z-index:1001;width:95%;max-width:450px;box-shadow:0 10px 20px rgba(0,0,0,0.5);overflow-y:auto;max-height:90vh;}
+#adminPanel input, #adminPanel label {width:100%;margin:5px 0;display:block;color:white;}
+#adminPanel input[type="text"],#adminPanel input[type="number"],#adminPanel input[type="file"],#adminPanel input[type="password"]{padding:10px;border-radius:10px;border:none;background:#333;color:white;}
+#adminPanel button {margin-top:10px;padding:10px;width:100%;border:none;border-radius:12px;cursor:pointer;transition:0.3s;}
+.saveBtn {background:linear-gradient(90deg,#00b894,#55efc4);color:black;}
+.closeBtn {background:linear-gradient(90deg,#d63031,#e17055);color:white;}
+</style>
+</head>
+<body>
+
+<header>
+  <img id="logo" src="https://via.placeholder.com/180x80?text=LOGO" alt="Logo">
+  <h1 id="storeName">متجري العصري</h1>
+</header>
+
+<button id="adminLoginBtn" onclick="adminLogin()">🔑</button>
+<button id="adminBtn" style="display:none;" onclick="toggleAdmin()">⚙️</button>
+
+<nav id="categories"></nav>
+<main id="products"></main>
+
+<div id="cart">
+  <h3>🛒 السلة</h3>
+  <div id="cartItems"></div>
+  <div id="cartTotal">الإجمالي: 0$</div>
+  <span id="cartCount">0 منتج</span>
+  <button onclick="checkout()">طلب عبر واتساب</button>
+</div>
+
+<div id="adminPanel">
+  <h3>لوحة الأدمن</h3>
+  <label>اسم المتجر:</label>
+  <input type="text" id="storeNameInput" placeholder="اسم المتجر">
+  <label>تغيير اللوغو:</label>
+  <input type="file" id="logoFile" accept="image/*">
+  <hr>
+  <h4>إضافة / تعديل منتج</h4>
+  <input type="text" id="prodName" placeholder="اسم المنتج">
+  <input type="number" id="prodPrice" placeholder="السعر">
+  <input type="file" id="prodImageFile" accept="image/*">
+  <button class="saveBtn" onclick="saveProduct()">💾 حفظ المنتج</button>
+  <hr>
+  <h4>إضافة قسم جديد</h4>
+  <input type="text" id="newCategory" placeholder="اسم القسم الجديد">
+  <button class="saveBtn" onclick="addCategory()">➕ إضافة قسم</button>
+  <hr>
+  <h4>تغيير كلمة مرور الأدمن</h4>
+  <input type="password" id="oldPass" placeholder="كلمة المرور القديمة">
+  <input type="password" id="newPass" placeholder="كلمة المرور الجديدة">
+  <button class="saveBtn" onclick="changeAdminPass()">تغيير كلمة المرور</button>
+  <hr>
+  <h4>إعدادات الواتساب</h4>
+  <input type="text" id="waNumber" placeholder="رقم واتساب مع كود الدولة">
+  <button class="saveBtn" onclick="saveWhatsApp()">💾 حفظ رقم واتساب</button>
+  <button class="closeBtn" onclick="toggleAdmin()">إغلاق</button>
+</div>
+
+<script>
+let productsData = JSON.parse(localStorage.getItem("productsData")||'{"الكترونيات":[{"name":"سماعة","price":20,"image":"https://via.placeholder.com/180"}],"ملابس":[{"name":"قميص","price":15,"image":"https://via.placeholder.com/180"}]}');
+let adminPass = localStorage.getItem("adminPass")||"2020";
+let waNumber = localStorage.getItem("waNumber")||"9647700000000";
+
+if(localStorage.getItem("storeName")) document.getElementById("storeName").textContent = localStorage.getItem("storeName");
+if(localStorage.getItem("logoSrc")) document.getElementById("logo").src = localStorage.getItem("logoSrc");
+
+let cart=[], currentCategory=Object.keys(productsData)[0], editIndex=null, isAdmin=false;
+
+function saveData(){ localStorage.setItem("productsData", JSON.stringify(productsData)); }
+function saveStoreName(){ localStorage.setItem("storeName", document.getElementById("storeName").textContent); }
+function saveLogo(){ localStorage.setItem("logoSrc", document.getElementById("logo").src); }
+function saveWhatsApp(){ 
+  waNumber=document.getElementById("waNumber").value;
+  localStorage.setItem("waNumber",waNumber);
+  alert("تم حفظ رقم الواتساب: "+waNumber);
+}
+
+function renderCategories(){
+  const nav=document.getElementById("categories");
+  nav.innerHTML="";
+  Object.keys(productsData).forEach(cat=>{
+    let btn=document.createElement("button");
+    btn.textContent=cat;
+    if(cat===currentCategory) btn.classList.add("active");
+    btn.onclick=()=>{currentCategory=cat;showProducts(cat);renderCategories();};
+    nav.appendChild(btn);
+  });
+}
+
+function addCategory(){
+  let newCat=document.getElementById("newCategory").value.trim();
+  if(!newCat){ alert("أدخل اسم القسم"); return; }
+  if(productsData[newCat]){ alert("القسم موجود بالفعل"); return; }
+  productsData[newCat]=[];
+  saveData();
+  document.getElementById("newCategory").value="";
+  currentCategory=newCat;
+  renderCategories();
+  showProducts(newCat);
+}
+
+function showProducts(cat){
+  const container=document.getElementById("products");
+  container.innerHTML="";
+  productsData[cat].forEach((p,i)=>{
+    let card=document.createElement("div");
+    card.className="card";
+    card.innerHTML=`
+      <img src="${p.image}" alt="">
+      <h3>${p.name}</h3>
+      <p>${p.price}$</p>
+      <button class="addBtn" onclick="addToCart('${cat}',${i})">إضافة للسلة</button>
+      ${isAdmin?`<button class="editBtn" onclick="editProduct('${cat}',${i})">تعديل</button>
+      <button class="delBtn" onclick="deleteProduct('${cat}',${i})">حذف</button>`:""}
+    `;
+    container.appendChild(card);
+  });
+}
+
+function addToCart(cat,i){
+  cart.push(productsData[cat][i]);
+  updateCart();
+}
+
+function updateCart(){
+  const cartDiv=document.getElementById("cart");
+  cartDiv.style.display="flex";
+  const list=document.getElementById("cartItems");
+  list.innerHTML="";
+  let total=0;
+  cart.forEach((p,index)=>{
+    total+=Number(p.price);
+    let item=document.createElement("div");
+    item.innerHTML=`${p.name} - ${p.price}$ <button onclick="removeFromCart(${index})" style="float:left;background:red;color:white;border:none;border-radius:5px;padding:2px 5px;cursor:pointer;">✖</button>`;
+    list.appendChild(item);
+  });
+  document.getElementById("cartCount").textContent=cart.length+" منتج";
+  document.getElementById("cartTotal").textContent="الإجمالي: "+total+"$";
+}
+
+function removeFromCart(index){
+  cart.splice(index,1);
+  updateCart();
+}
+
+function checkout(){
+  if(cart.length===0){alert("السلة فارغة!");return;}
+  let msg="طلب جديد:\n";
+  cart.forEach(p=>{msg+=`${p.name} - ${p.price}$\n`;});
+  window.open("https://wa.me/"+waNumber+"?text="+encodeURIComponent(msg),"_blank");
+}
+
+function adminLogin(){
+  let code=prompt("أدخل رمز الأدمن:");
+  if(code===adminPass){
+    isAdmin=true;
+    document.getElementById("adminBtn").style.display="inline-block";
+    document.getElementById("adminLoginBtn").style.display="none";
+    renderCategories();
+    showProducts(currentCategory);
+  } else alert("رمز خاطئ!");
+}
+
+function toggleAdmin(){
+  let panel=document.getElementById("adminPanel");
+  panel.style.display=(panel.style.display==="block"?"none":"block");
+  document.getElementById("storeNameInput").value=document.getElementById("storeName").textContent;
+  document.getElementById("waNumber").value=waNumber;
+}
+
+document.getElementById("storeNameInput").addEventListener("input",()=>{ document.getElementById("storeName").textContent=document.getElementById("storeNameInput").value; saveStoreName(); });
+
+document.getElementById("logoFile").addEventListener("change",function(){
+  if(this.files && this.files[0]){
+    let reader=new FileReader();
+    reader.onload=e=>{ document.getElementById("logo").src=e.target.result; saveLogo(); }
+    reader.readAsDataURL(this.files[0]);
+  }
+});
+
+function saveProduct(){
+  let name=document.getElementById("prodName").value;
+  let price=document.getElementById("prodPrice").value;
+  let fileInput=document.getElementById("prodImageFile");
+  if(!name||!price||fileInput.files.length===0){ alert("أكمل البيانات"); return; }
+  let reader=new FileReader();
+  reader.onload=function(e){
+    let imageData=e.target.result;
+    if(editIndex===null){
+      productsData[currentCategory].push({name,price,image:imageData});
+    } else{
+      productsData[currentCategory][editIndex]={name,price,image:imageData};
+      editIndex=null;
+    }
+    saveData();
+    showProducts(currentCategory);
+    document.getElementById("prodName").value="";
+    document.getElementById("prodPrice").value="";
+    fileInput.value="";
+  }
+  reader.readAsDataURL(fileInput.files[0]);
+}
+
+function editProduct(cat,i){
+  editIndex=i;
+  let p=productsData[cat][i];
+  document.getElementById("prodName").value=p.name;
+  document.getElementById("prodPrice").value=p.price;
+  toggleAdmin();
+}
+
+function deleteProduct(cat,i){
+  if(confirm("هل تريد حذف المنتج؟")){
+    productsData[cat].splice(i,1);
+    saveData();
+    showProducts(cat);
+  }
+}
+
+function changeAdminPass(){
+  let oldPass=document.getElementById("oldPass").value;
+  let newPass=document.getElementById("newPass").value;
+  if(oldPass!==adminPass){ alert("كلمة المرور القديمة خاطئة!"); return; }
+  if(!newPass){ alert("أدخل كلمة مرور جديدة!"); return; }
+  adminPass=newPass;
+  localStorage.setItem("adminPass",adminPass);
+  alert("تم تغيير كلمة المرور بنجاح!");
+  document.getElementById("oldPass").value="";
+  document.getElementById("newPass").value="";
+}
+
+renderCategories();
+showProducts(currentCategory);
+</script>
+
+</body>
+</html>
